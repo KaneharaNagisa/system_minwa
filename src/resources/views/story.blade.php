@@ -29,7 +29,7 @@
             </div>
 
             @if ($story->main_image_path)
-                <img src="{{ asset('storage/' . $story->main_image_path) }}" alt="{{ $story->title }}" class="mb-6 max-h-[420px] w-full object-cover">
+                <img src="{{ Str::startsWith($story->main_image_path, ['http://', 'https://']) ? $story->main_image_path : asset('storage/' . $story->main_image_path) }}" alt="{{ $story->title }}" class="mb-6 max-h-[420px] w-full object-cover">
             @endif
 
             <div id="story-body" class="story-body text-medium">{!! Str::markdown($story->body_markdown) !!}</div>

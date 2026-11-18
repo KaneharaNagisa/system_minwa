@@ -1,0 +1,88 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Municipality;
+use App\Models\Story;
+use App\Models\Tag;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class AdminManagementTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_management_pages_require_authentication(): void
+    {
+        $this->get(route('admin.stories.index'))->assertRedirect(route('admin.dashboard'));
+        $this->get(route('admin.municipalities.index'))->assertRedirect(route('admin.dashboard'));
+        $this->get(route('admin.tags.index'))->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function test_authenticated_user_can_open_each_management_screen(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get(route('admin.stories.index'))->assertOk()->assertSee('民話一覧');
+        $this->get(route('admin.stories.create'))->assertOk()->assertSee('本文（Markdown）');
+        $this->get(route('admin.municipalities.index'))->assertOk()->assertSee('市町村一覧');
+        $this->get(route('admin.municipalities.create'))->assertOk()->assertSee('地域名');
+        $this->get(route('admin.tags.index'))->assertOk()->assertSee('テーマタグ一覧');
+        $this->get(route('admin.tags.create'))->assertOk()->assertSee('タグ名');
+    }
+
+    public function test_stories_can_be_created_searched_and_soft_deleted(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $municipality = Municipality::create(['name' => '長野市', 'region_name' => '北信']);
+        $tag = Tag::create(['name' => '山の話']);
+
+        $this->post(route('admin.stories.store'), [
+            'title' => '山の民話',
+            'title_kana' => 'やまのみんわ',
+            'municipality_id' => $municipality->id,
+            'body_markdown' => '## 本文',
+            'tag_ids' => [$tag->id],
+            'source_citation_checked' => '1',
+        ])->assertRedirect(route('admin.stories.index'));
+
+        $story = Story::firstOrFail();
+        $this->assertSame([$tag->id], $story->tags()->pluck('tags.id')->all());
+        $this->assertTrue($story->source_citation_checked);
+        $this->get(route('admin.stories.index', ['q' => '山の', 'municipality_id' => $municipality->id]))
+            ->assertOk()
+            ->assertSee('山の民話');
+        $this->get(route('admin.stories.index', ['q' => '該当なし']))
+            ->assertOk()
+            ->assertDontSee('山の民話');
+
+        $this->delete(route('admin.stories.destroy', $story))->assertRedirect(route('admin.stories.index'));
+        $this->assertSoftDeleted('stories', ['id' => $story->id]);
+        $this->get('/')->assertDontSee('山の民話');
+    }
+
+    public function test_municipalities_and_tags_can_be_managed(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->post(route('admin.municipalities.store'), ['name' => '松本市', 'region_name' => '中信'])
+            ->assertRedirect(route('admin.municipalities.index'));
+        $municipality = Municipality::where('name', '松本市')->firstOrFail();
+        $this->put(route('admin.municipalities.update', $municipality), ['name' => '新松本市', 'region_name' => '中信'])
+            ->assertRedirect(route('admin.municipalities.index'));
+        $this->assertDatabaseHas('municipalities', ['id' => $municipality->id, 'name' => '新松本市']);
+
+        $this->post(route('admin.tags.store'), ['name' => '伝説'])
+            ->assertRedirect(route('admin.tags.index'));
+        $tag = Tag::where('name', '伝説')->firstOrFail();
+        $this->put(route('admin.tags.update', $tag), ['name' => '昔話'])
+            ->assertRedirect(route('admin.tags.index'));
+        $this->assertDatabaseHas('tags', ['id' => $tag->id, 'name' => '昔話']);
+
+        $this->delete(route('admin.municipalities.destroy', $municipality))->assertRedirect(route('admin.municipalities.index'));
+        $this->delete(route('admin.tags.destroy', $tag))->assertRedirect(route('admin.tags.index'));
+        $this->assertDatabaseMissing('municipalities', ['id' => $municipality->id]);
+        $this->assertDatabaseMissing('tags', ['id' => $tag->id]);
+    }
+}
