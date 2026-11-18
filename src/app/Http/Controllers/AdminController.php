@@ -7,11 +7,13 @@ use App\Models\Story;
 use App\Models\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use RuntimeException;
 
 class AdminController extends Controller
 {
@@ -69,13 +71,14 @@ class AdminController extends Controller
     {
         $data = $this->validateStory($request);
         $tagIds = $data['tag_ids'] ?? [];
-        unset($data['tag_ids']);
+        unset($data['body_images'], $data['main_image'], $data['tag_ids']);
         $data['source_citation_checked'] = $request->boolean('source_citation_checked');
         $data['expression_rewritten_checked'] = $request->boolean('expression_rewritten_checked');
 
         if ($request->hasFile('main_image')) {
-            $data['main_image_path'] = $request->file('main_image')->storePublicly('stories', 'public');
+            $data['main_image_path'] = $this->storeStoryImage($request->file('main_image'));
         }
+        $this->appendBodyImages($data, $request);
 
         $story = Story::create($data);
         $story->tags()->sync($tagIds);
@@ -94,13 +97,14 @@ class AdminController extends Controller
     {
         $data = $this->validateStory($request);
         $tagIds = $data['tag_ids'] ?? [];
-        unset($data['tag_ids']);
+        unset($data['body_images'], $data['main_image'], $data['tag_ids']);
         $data['source_citation_checked'] = $request->boolean('source_citation_checked');
         $data['expression_rewritten_checked'] = $request->boolean('expression_rewritten_checked');
 
         if ($request->hasFile('main_image')) {
-            $data['main_image_path'] = $request->file('main_image')->storePublicly('stories', 'public');
+            $data['main_image_path'] = $this->storeStoryImage($request->file('main_image'));
         }
+        $this->appendBodyImages($data, $request);
 
         $story->update($data);
         $story->tags()->sync($tagIds);
@@ -218,6 +222,8 @@ class AdminController extends Controller
             'body_markdown' => ['required', 'string'],
             'main_image_path' => ['nullable', 'string', 'max:2048'],
             'main_image' => ['nullable', 'image', 'max:10240'],
+            'body_images' => ['nullable', 'array'],
+            'body_images.*' => ['image', 'max:10240'],
             'spot_name' => ['nullable', 'string', 'max:255'],
             'spot_address' => ['nullable', 'string'],
             'spot_map_url' => ['nullable', 'url', 'max:2048'],
@@ -236,6 +242,31 @@ class AdminController extends Controller
             'municipalities' => Municipality::query()->orderBy('name')->get(),
             'tags' => Tag::query()->orderBy('name')->get(),
         ];
+    }
+
+    private function appendBodyImages(array &$data, Request $request): void
+    {
+        $images = [];
+
+        foreach ($request->file('body_images', []) as $image) {
+            $path = $this->storeStoryImage($image);
+            $images[] = '![挿絵](/storage/'.$path.')';
+        }
+
+        if ($images !== []) {
+            $data['body_markdown'] = rtrim($data['body_markdown'])."\n\n".implode("\n\n", $images);
+        }
+    }
+
+    private function storeStoryImage(UploadedFile $image): string
+    {
+        $path = $image->storePublicly('stories', 'public');
+
+        if ($path === false) {
+            throw new RuntimeException('画像を保存できませんでした。');
+        }
+
+        return $path;
     }
 
     public function login(Request $request): RedirectResponse

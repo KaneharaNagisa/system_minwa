@@ -51,6 +51,11 @@
                 <input class="admin-form-control" id="main_image_path" name="main_image_path" value="{{ old('main_image_path', $story->main_image_path) }}" maxlength="2048">
                 <small class="admin-help">画像ファイルは10MB以下です。新しいファイルを選ぶと保存済みパスより優先されます。</small>
             </div>
+            <div class="admin-form-group admin-form-wide">
+                <label class="admin-form-label" for="body_images">本文中の挿絵</label>
+                <input class="admin-form-control" id="body_images" name="body_images[]" type="file" accept="image/*" multiple>
+                <small class="admin-help">選択した画像は本文末尾にMarkdown記法で追加されます。位置は本文欄で調整してください。各画像10MB以下。</small>
+            </div>
             <div class="admin-form-group">
                 <label class="admin-form-label" for="spot_name">ゆかりの地 名称</label>
                 <input class="admin-form-control" id="spot_name" name="spot_name" value="{{ old('spot_name', $story->spot_name) }}" maxlength="255">

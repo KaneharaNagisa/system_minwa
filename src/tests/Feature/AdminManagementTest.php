@@ -7,6 +7,8 @@ use App\Models\Story;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminManagementTest extends TestCase
@@ -60,6 +62,50 @@ class AdminManagementTest extends TestCase
         $this->delete(route('admin.stories.destroy', $story))->assertRedirect(route('admin.stories.index'));
         $this->assertSoftDeleted('stories', ['id' => $story->id]);
         $this->get('/')->assertDontSee('山の民話');
+    }
+
+    public function test_story_list_sorts_and_paginates_at_fifteen_records(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        for ($index = 15; $index >= 0; $index--) {
+            Story::create([
+                'title' => sprintf('一覧テスト%02d', $index),
+                'body_markdown' => '本文',
+            ]);
+        }
+
+        $response = $this->get(route('admin.stories.index', ['sort' => 'title', 'direction' => 'asc']))
+            ->assertOk()
+            ->assertSee('一覧テスト00')
+            ->assertSee('一覧テスト14')
+            ->assertDontSee('一覧テスト15')
+            ->assertSee('page=2');
+
+        $this->assertLessThan(
+            strpos($response->getContent(), '一覧テスト14'),
+            strpos($response->getContent(), '一覧テスト00'),
+        );
+    }
+
+    public function test_story_form_uploads_main_and_inline_images(): void
+    {
+        $this->actingAs(User::factory()->create());
+        Storage::fake('public');
+
+        $this->post(route('admin.stories.store'), [
+            'title' => '挿絵つきの民話',
+            'body_markdown' => '本文',
+            'main_image' => UploadedFile::fake()->image('cover.jpg'),
+            'body_images' => [UploadedFile::fake()->image('illustration.jpg')],
+        ])->assertRedirect(route('admin.stories.index'));
+
+        $story = Story::firstOrFail();
+        $this->assertStringStartsWith('stories/', $story->main_image_path);
+        $this->assertStringContainsString('![挿絵](/storage/stories/', $story->body_markdown);
+        Storage::disk('public')->assertExists($story->main_image_path);
+        $this->assertSame(1, preg_match('/!\[挿絵\]\(\/storage\/([^)]+)\)/', $story->body_markdown, $matches));
+        Storage::disk('public')->assertExists($matches[1]);
     }
 
     public function test_municipalities_and_tags_can_be_managed(): void
