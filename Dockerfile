@@ -33,4 +33,9 @@ COPY php.ini /usr/local/etc/php/conf.d/99-custom.ini
 
 WORKDIR /var/www/html
 
+RUN mkdir -p /var/www/html/storage/framework/{cache,sessions,views} \
+    /var/www/html/storage/logs \
+    /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
 EXPOSE 9000

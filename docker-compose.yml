@@ -6,6 +6,9 @@ services:
     container_name: system_minwa
     restart: unless-stopped
     working_dir: /var/www/html
+    command: >
+      sh -c "chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+      && exec php-fpm"
     volumes:
       - ./src:/var/www/html
       - app_node_modules:/var/www/html/node_modules
