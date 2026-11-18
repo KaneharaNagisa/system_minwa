@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Municipality;
 use App\Models\Story;
 use App\Models\Tag;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use RuntimeException;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\Process;
 
 class AdminController extends Controller
 {
@@ -65,6 +68,56 @@ class AdminController extends Controller
     public function createStory(): View
     {
         return view('admin.stories.form', $this->storyFormData(new Story));
+    }
+
+    public function ocrImages(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'images' => ['required', 'array', 'min:1', 'max:10'],
+            'images.*' => ['required', 'image', 'max:10240'],
+        ]);
+        $executable = (new ExecutableFinder)->find('tesseract');
+
+        if ($executable === null) {
+            return response()->json([
+                'message' => 'OCR機能を利用できません。サーバーに日本語OCR環境が設定されていません。',
+            ], 503);
+        }
+
+        $recognizedTexts = [];
+
+        foreach ($validated['images'] as $image) {
+            $process = new Process([
+                $executable,
+                $image->getRealPath(),
+                'stdout',
+                '-l',
+                'jpn+eng',
+                '--psm',
+                '3',
+            ]);
+            $process->setTimeout(45);
+            $process->run();
+
+            if (! $process->isSuccessful()) {
+                logger()->error('Local OCR processing failed.', [
+                    'exit_code' => $process->getExitCode(),
+                    'error' => $process->getErrorOutput(),
+                ]);
+
+                return response()->json([
+                    'message' => '画像の読み取りに失敗しました。画像を確認して再度お試しください。',
+                ], 422);
+            }
+
+            $text = trim($process->getOutput());
+
+            if ($text !== '') {
+                $recognizedTexts[] = $text;
+            }
+        }
+
+        return response()->json(['text' => implode("\n\n", $recognizedTexts)]);
     }
 
     public function storeStory(Request $request): RedirectResponse

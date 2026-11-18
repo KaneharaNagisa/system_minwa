@@ -108,6 +108,18 @@ class AdminManagementTest extends TestCase
         Storage::disk('public')->assertExists($matches[1]);
     }
 
+    public function test_ocr_endpoint_processes_multiple_images_and_returns_text(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->postJson(route('admin.stories.ocr'), [
+            'images' => [
+                UploadedFile::fake()->image('page-one.png'),
+                UploadedFile::fake()->image('page-two.png'),
+            ],
+        ])->assertOk()->assertJsonStructure(['text']);
+    }
+
     public function test_municipalities_and_tags_can_be_managed(): void
     {
         $this->actingAs(User::factory()->create());

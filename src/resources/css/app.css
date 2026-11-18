@@ -311,6 +311,19 @@ body {
 .admin-check { display: inline-flex; align-items: center; gap: .4rem; color: #495057; font-size: .875rem; }
 .admin-form-footer { display: flex; justify-content: flex-end; gap: .6rem; border-top: 1px solid #edf0f2; padding-top: 1rem; }
 .admin-current-image { margin: 0 0 .5rem; color: #6c757d; font-size: .8rem; overflow-wrap: anywhere; }
+.admin-ocr-card { margin-bottom: 1.25rem; border: 1px solid #dfe5ec; border-radius: .75rem; background: #fff; padding: 1.5rem; box-shadow: 0 1px 3px rgb(33 37 41 / .06); }
+.admin-ocr-title { margin: 0; color: #193b61; font-size: 1rem; font-weight: 700; }
+.admin-ocr-title span { margin-right: .25rem; color: #2868d7; font-size: 1.2rem; }
+.admin-ocr-description { margin: .75rem 0 1rem; color: #546b83; font-size: .875rem; line-height: 1.7; }
+.admin-ocr-dropzone { display: flex; min-height: 100px; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; border: 2px dashed #cbd6e4; border-radius: .5rem; background: #f8fafc; padding: 1rem; transition: background .15s ease, border-color .15s ease; }
+.admin-ocr-dropzone.is-dragging { border-color: #2868d7; background: #eef4ff; }
+.admin-ocr-file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+.admin-ocr-select { min-width: min(100%, 265px); }
+.admin-ocr-select:disabled { cursor: wait; opacity: .65; }
+.admin-ocr-file-list { margin: 0; color: #6c757d; font-size: .8rem; overflow-wrap: anywhere; text-align: center; }
+.admin-ocr-status { margin: .75rem 0 0; color: #285d43; font-size: .875rem; }
+.admin-ocr-status:empty { display: none; }
+.admin-ocr-status.is-error { color: #b02a37; }
 
 @media (max-width: 767px) {
     .admin-page-heading { align-items: flex-start; }

@@ -17,6 +17,9 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
         libpng-dev \
         libzip-dev \
         libatomic1 \
+        tesseract-ocr \
+        tesseract-ocr-eng \
+        tesseract-ocr-jpn \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         bcmath \

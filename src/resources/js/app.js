@@ -1,4 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const ocrUploader = document.querySelector('[data-ocr-uploader]');
+
+    if (ocrUploader) {
+        const fileInput = ocrUploader.querySelector('[data-ocr-files]');
+        const selectButton = ocrUploader.querySelector('[data-ocr-select]');
+        const dropzone = ocrUploader.querySelector('[data-ocr-dropzone]');
+        const fileList = ocrUploader.querySelector('[data-ocr-file-list]');
+        const status = ocrUploader.querySelector('[data-ocr-status]');
+        const bodyField = document.querySelector('#body_markdown');
+        const form = ocrUploader.closest('form');
+
+        const displayStatus = (message, isError = false) => {
+            status.textContent = message;
+            status.classList.toggle('is-error', isError);
+        };
+
+        const recognizeImages = async (files) => {
+            if (files.length === 0) return;
+            if (files.length > 10) {
+                displayStatus('画像は一度に10枚まで選択できます。', true);
+                return;
+            }
+
+            const formData = new FormData();
+            files.forEach((file) => formData.append('images[]', file));
+            selectButton.disabled = true;
+            displayStatus('画像を読み取っています。しばらくお待ちください。');
+
+            try {
+                const response = await fetch(ocrUploader.dataset.ocrUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                    },
+                    body: formData,
+                });
+                const responseBody = await response.text();
+                let result = {};
+                try {
+                    result = responseBody ? JSON.parse(responseBody) : {};
+                } catch {
+                    result = {};
+                }
+
+                if (!response.ok) {
+                    throw new Error(result.message || `画像の読み取りに失敗しました（${response.status}）。`);
+                }
+
+                const recognizedText = result.text.trim();
+                if (recognizedText === '') {
+                    displayStatus('文字を読み取れませんでした。画像を確認して再度お試しください。', true);
+                    return;
+                }
+
+                bodyField.value = bodyField.value.trim()
+                    ? `${bodyField.value.trimEnd()}\n\n${recognizedText}`
+                    : recognizedText;
+                bodyField.dispatchEvent(new Event('input', { bubbles: true }));
+                displayStatus(`読み取り完了。本文欄に${recognizedText.length.toLocaleString()}文字を追加しました。内容を確認・編集してください。`);
+            } catch (error) {
+                displayStatus(error.message || '通信に失敗しました。時間をおいて再度お試しください。', true);
+            } finally {
+                selectButton.disabled = false;
+                fileInput.value = '';
+                fileList.textContent = '最大10枚、1枚10MBまで';
+            }
+        };
+
+        selectButton.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => recognizeImages(Array.from(fileInput.files)));
+        dropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropzone.classList.add('is-dragging');
+        });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('is-dragging'));
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropzone.classList.remove('is-dragging');
+            fileList.textContent = Array.from(event.dataTransfer.files).map((file) => file.name).join('、');
+            recognizeImages(Array.from(event.dataTransfer.files));
+        });
+    }
+
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const sidebarToggle = document.querySelector('[data-admin-sidebar-toggle]');
     const sidebarBackdrop = document.querySelector('[data-admin-sidebar-backdrop]');
