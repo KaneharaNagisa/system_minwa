@@ -75,6 +75,12 @@ class AdminController extends Controller
         $validated = $request->validate([
             'images' => ['required', 'array', 'min:1', 'max:10'],
             'images.*' => ['required', 'image', 'max:10240'],
+        ], [
+            'images.required' => 'OCRする画像を選択してください。',
+            'images.array' => '画像を選択してください。',
+            'images.max' => '画像は一度に10枚まで選択できます。',
+            'images.*.image' => '画像ファイルを選択してください。',
+            'images.*.max' => '画像は1枚あたり10MB以下にしてください。',
         ]);
         $executable = (new ExecutableFinder)->find('tesseract');
 

@@ -118,6 +118,15 @@ class AdminManagementTest extends TestCase
                 UploadedFile::fake()->image('page-two.png'),
             ],
         ])->assertOk()->assertJsonStructure(['text']);
+
+        $tooManyImages = [];
+        for ($index = 0; $index < 11; $index++) {
+            $tooManyImages[] = UploadedFile::fake()->image("page-{$index}.png");
+        }
+
+        $this->postJson(route('admin.stories.ocr'), ['images' => $tooManyImages])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('images');
     }
 
     public function test_municipalities_and_tags_can_be_managed(): void
