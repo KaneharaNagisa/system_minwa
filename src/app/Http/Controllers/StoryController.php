@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Municipality;
 use App\Models\Story;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,10 +15,34 @@ class StoryController extends Controller
         $municipalityId = $request->string('municipality')->toString();
         $tagId = $request->string('tag')->toString();
         $keyword = $request->string('q')->trim()->toString();
+        $mapAreas = json_decode(
+            file_get_contents(resource_path('data/nagano-municipalities.json')),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+        $mapNamesByCode = array_column($mapAreas, 'name', 'code');
+        $mapMunicipalityCode = null;
+
+        if (preg_match('/^area-(\d{5})$/D', $municipalityId, $matches) === 1) {
+            $mapMunicipalityCode = $matches[1];
+        }
 
         $stories = Story::query()
             ->with(['municipality', 'tags'])
-            ->when($municipalityId !== '', fn ($query) => $query->where('municipality_id', $municipalityId))
+            ->when(
+                $mapMunicipalityCode !== null,
+                fn ($query) => $query->whereHas(
+                    'municipality',
+                    fn ($municipalityQuery) => $municipalityQuery->where(
+                        'name',
+                        $mapNamesByCode[$mapMunicipalityCode] ?? '',
+                    ),
+                ),
+                fn ($query) => $query->when(
+                    $municipalityId !== '',
+                    fn ($municipalityQuery) => $municipalityQuery->where('municipality_id', $municipalityId),
+                ),
+            )
             ->when($tagId !== '', fn ($query) => $query->whereHas('tags', fn ($tagQuery) => $tagQuery->where('tags.id', $tagId)))
             ->when($keyword !== '', function ($query) use ($keyword) {
                 $query->where(function ($searchQuery) use ($keyword) {
@@ -35,12 +60,25 @@ class StoryController extends Controller
             ->withCount('stories')
             ->orderBy('name')
             ->get();
+        $municipalitiesByName = $municipalities->keyBy('name');
+        $mapAreas = array_map(function (array $mapArea) use ($municipalitiesByName): array {
+            $municipality = $municipalitiesByName->get($mapArea['name']);
 
-        $tags = \App\Models\Tag::query()->orderBy('name')->get();
+            return [
+                ...$mapArea,
+                'municipality_id' => $municipality?->id,
+                'stories_count' => $municipality?->stories_count ?? 0,
+                'selection_value' => $municipality?->id ?? 'area-'.$mapArea['code'],
+            ];
+        }, $mapAreas);
+        usort($mapAreas, fn (array $first, array $second): int => strcmp($first['name'], $second['name']));
+
+        $tags = Tag::query()->orderBy('name')->get();
 
         return view('welcome', [
             'stories' => $stories,
             'municipalities' => $municipalities,
+            'mapAreas' => $mapAreas,
             'tags' => $tags,
             'selectedMunicipality' => $municipalityId,
             'selectedTag' => $tagId,

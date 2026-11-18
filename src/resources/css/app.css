@@ -22,6 +22,51 @@ body {
     writing-mode: vertical-rl;
 }
 
+.nagano-map-link {
+    cursor: pointer;
+    outline: none;
+}
+
+.nagano-map-area {
+    fill: #eee7d8;
+    stroke: #faf8f3;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    transition: fill .15s ease;
+}
+
+.nagano-map-area.has-stories {
+    fill: #d6b38b;
+}
+
+.nagano-map-area.is-selected,
+.nagano-map-link:hover .nagano-map-area,
+.nagano-map-link:focus-visible .nagano-map-area {
+    fill: #b93822;
+}
+
+.nagano-map-link:focus-visible .nagano-map-area {
+    stroke: #292524;
+    stroke-width: 2.5;
+}
+
+.map-legend-swatch {
+    display: inline-block;
+    width: .75rem;
+    height: .75rem;
+    border: 1px solid rgb(120 53 15 / .2);
+    background: #eee7d8;
+}
+
+.map-legend-swatch.has-stories {
+    background: #d6b38b;
+}
+
+.map-legend-swatch.is-selected {
+    background: #b93822;
+}
+
 .paper-panel,
 .paper-card {
     border: 1px solid rgb(120 53 15 / 0.2);
