@@ -83,6 +83,30 @@ class ExampleTest extends TestCase
             ->assertViewHas('registeredStoryCount', 2);
     }
 
+    public function test_prefecture_wide_story_button_filters_the_map(): void
+    {
+        $prefectureWide = Municipality::create([
+            'name' => '長野県全域',
+            'region_name' => '全域',
+        ]);
+        Story::create([
+            'municipality_id' => $prefectureWide->id,
+            'title' => '県全域の民話',
+            'body_markdown' => '本文',
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('長野県全域、登録民話1編')
+            ->assertSee('県全域の民話');
+
+        $this->get('/?municipality='.$prefectureWide->id)
+            ->assertOk()
+            ->assertSee('県全域の民話')
+            ->assertSee('長野県全域、登録民話1編')
+            ->assertSee('aria-current="page"', false);
+    }
+
     public function test_admin_shows_login_for_guests(): void
     {
         $this->get('/admin')

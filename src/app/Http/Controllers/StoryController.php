@@ -60,6 +60,8 @@ class StoryController extends Controller
             ->withCount('stories')
             ->orderBy('name')
             ->get();
+        $prefectureWideMunicipality = $municipalities
+            ->firstWhere('name', '長野県全域');
         $municipalitiesByName = $municipalities->keyBy('name');
         $mapAreas = array_map(function (array $mapArea) use ($municipalitiesByName): array {
             $municipality = $municipalitiesByName->get($mapArea['name']);
@@ -79,6 +81,7 @@ class StoryController extends Controller
             'stories' => $stories,
             'registeredStoryCount' => Story::count(),
             'municipalities' => $municipalities,
+            'prefectureWideMunicipality' => $prefectureWideMunicipality,
             'mapAreas' => $mapAreas,
             'tags' => $tags,
             'selectedMunicipality' => $municipalityId,

@@ -51,7 +51,25 @@
                 </div>
 
                 <div class="grid items-start gap-6 lg:grid-cols-2">
-                    <div class="rounded-sm border border-gold/15 bg-stone-100/70 p-3 sm:p-5">
+                    <div class="relative rounded-sm border border-gold/15 bg-stone-100/70 p-3 sm:p-5">
+                        @if ($prefectureWideMunicipality)
+                            @php
+                                $prefectureWideActive = (string) $prefectureWideMunicipality->id === $selectedMunicipality;
+                                $prefectureWideParameters = array_filter([
+                                    'municipality' => $prefectureWideActive ? null : $prefectureWideMunicipality->id,
+                                    'tag' => $selectedTag,
+                                    'q' => $keyword,
+                                ]);
+                            @endphp
+                            <a href="{{ route('stories.index', $prefectureWideParameters) }}"
+                               class="absolute left-3 top-3 z-10 flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 text-center shadow-md transition sm:left-5 sm:top-5 sm:h-28 sm:w-28 {{ $prefectureWideActive ? 'border-ink bg-ink text-white ring-4 ring-vermilion/20' : 'border-gold/70 bg-white/95 text-ink hover:bg-washi' }}"
+                               @if ($prefectureWideActive) aria-current="page" @endif
+                               aria-label="長野県全域、登録民話{{ $prefectureWideMunicipality->stories_count }}編">
+                                <span class="text-[10px] font-bold leading-tight sm:text-xs">長野県全域</span>
+                                <span class="mt-1 text-xl font-bold sm:text-2xl">{{ $prefectureWideMunicipality->stories_count }}</span>
+                                <span class="text-[10px] text-muted {{ $prefectureWideActive ? '!text-amber-100' : '' }}">編</span>
+                            </a>
+                        @endif
                         <svg viewBox="0 0 560 720" class="mx-auto block h-auto w-full max-w-[31rem]" role="img" aria-labelledby="nagano-map-title nagano-map-description">
                             <title id="nagano-map-title">長野県の市町村別地図</title>
                             <desc id="nagano-map-description">長野県内77市町村の境界図です。各市町村を選ぶと登録民話で絞り込みます。</desc>
