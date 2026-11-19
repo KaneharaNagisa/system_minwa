@@ -314,6 +314,8 @@ class AdminController extends Controller
             'spot_name' => ['nullable', 'string', 'max:255'],
             'spot_address' => ['nullable', 'string'],
             'spot_map_url' => ['nullable', 'url', 'max:2048'],
+            'related_site_url' => ['nullable', 'url', 'max:2048'],
+            'admin_memo' => ['nullable', 'string'],
             'source' => ['nullable', 'string'],
             'source_citation_checked' => ['sometimes', 'boolean'],
             'expression_rewritten_checked' => ['sometimes', 'boolean'],

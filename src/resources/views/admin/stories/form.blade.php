@@ -80,8 +80,18 @@
                 <input class="admin-form-control" id="spot_map_url" name="spot_map_url" type="url" value="{{ old('spot_map_url', $story->spot_map_url) }}" maxlength="2048">
             </div>
             <div class="admin-form-group admin-form-wide">
+                <label class="admin-form-label" for="related_site_url">関連サイトURL</label>
+                <input class="admin-form-control" id="related_site_url" name="related_site_url" type="url" value="{{ old('related_site_url', $story->related_site_url) }}" maxlength="2048">
+                <small class="admin-help">民話の詳細画面から新しいタブでリンクを開きます。</small>
+            </div>
+            <div class="admin-form-group admin-form-wide">
                 <label class="admin-form-label" for="source">出典</label>
                 <textarea class="admin-form-control admin-textarea-short" id="source" name="source" rows="3">{{ old('source', $story->source) }}</textarea>
+            </div>
+            <div class="admin-form-group admin-form-wide">
+                <label class="admin-form-label" for="admin_memo">管理者メモ（Markdown）</label>
+                <textarea class="admin-form-control admin-markdown-editor" id="admin_memo" name="admin_memo" rows="8">{{ old('admin_memo', $story->admin_memo) }}</textarea>
+                <small class="admin-help">このメモは管理画面でのみ表示され、エンドユーザー画面には公開されません。</small>
             </div>
             <fieldset class="admin-form-group admin-form-wide admin-checks">
                 <legend class="admin-form-label">出典・著作権確認</legend>

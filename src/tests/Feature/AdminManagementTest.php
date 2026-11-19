@@ -68,6 +68,33 @@ class AdminManagementTest extends TestCase
         $this->get('/')->assertDontSee('山の民話');
     }
 
+    public function test_related_site_url_is_public_and_admin_memo_is_private(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->post(route('admin.stories.store'), [
+            'title' => '関連情報の民話',
+            'body_markdown' => '本文',
+            'related_site_url' => 'https://example.com/minwa',
+            'admin_memo' => "## 確認メモ\n\n出典を確認する",
+        ])->assertRedirect(route('admin.stories.index'));
+
+        $story = Story::firstOrFail();
+        $this->assertSame('https://example.com/minwa', $story->related_site_url);
+        $this->assertSame("## 確認メモ\n\n出典を確認する", $story->admin_memo);
+
+        $this->get(route('admin.stories.edit', $story))
+            ->assertOk()
+            ->assertSee('関連サイトURL')
+            ->assertSee('管理者メモ（Markdown）')
+            ->assertSee('確認メモ');
+
+        $this->get(route('stories.show', $story))
+            ->assertOk()
+            ->assertSee('https://example.com/minwa')
+            ->assertDontSee('確認メモ');
+    }
+
     public function test_story_list_sorts_and_paginates_at_fifteen_records(): void
     {
         $this->actingAs(User::factory()->create());

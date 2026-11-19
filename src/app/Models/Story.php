@@ -21,6 +21,8 @@ class Story extends Model
         'spot_name',
         'spot_address',
         'spot_map_url',
+        'related_site_url',
+        'admin_memo',
         'source',
         'source_citation_checked',
         'expression_rewritten_checked',

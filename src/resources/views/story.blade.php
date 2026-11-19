@@ -46,6 +46,12 @@
             @if ($story->source)
                 <p class="mt-6 border-t border-gold/20 pt-4 text-xs text-muted">出典・伝承：{{ $story->source }}</p>
             @endif
+
+            @if ($story->related_site_url)
+                <p class="mt-4 border-t border-gold/20 pt-4 text-sm">
+                    <a href="{{ $story->related_site_url }}" target="_blank" rel="noopener noreferrer" class="text-amber-900 underline">関連サイトを見る</a>
+                </p>
+            @endif
         </article>
 
         @if ($relatedStories->isNotEmpty())
