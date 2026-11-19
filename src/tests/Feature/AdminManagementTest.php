@@ -41,6 +41,26 @@ class AdminManagementTest extends TestCase
         );
     }
 
+    public function test_minwa_seeder_registers_manga_stories_with_bodies_and_source_links_without_duplicates(): void
+    {
+        $this->seed(MinwaSeeder::class);
+        $this->seed(MinwaSeeder::class);
+
+        $this->assertDatabaseCount('stories', 67);
+
+        $stories = Story::where('source', 'like', '%まんが日本昔ばなし〜データベース〜（長野県）%')->get();
+        $this->assertCount(40, $stories);
+        $this->assertCount(40, $stories->pluck('related_site_url')->unique());
+        foreach ($stories as $story) {
+            $this->assertNotEmpty($story->body_markdown);
+            $this->assertStringStartsWith('http://nihon.syoukoukai.com/modules/stories/index.php?lid=', $story->related_site_url);
+        }
+
+        $sharedStory = $stories->firstWhere('title', 'あさこ・ゆうこ');
+        $this->assertNotNull($sharedStory);
+        $this->assertStringContainsString('https://minwanoheya.jp/area/nagano_009/', $sharedStory->body_markdown);
+    }
+
     public function test_management_pages_require_authentication(): void
     {
         $this->get(route('admin.stories.index'))->assertRedirect(route('admin.dashboard'));
