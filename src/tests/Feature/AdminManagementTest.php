@@ -26,7 +26,11 @@ class AdminManagementTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        $this->get(route('admin.stories.index'))->assertOk()->assertSee('民話一覧');
+        $this->get(route('admin.stories.index'))
+            ->assertOk()
+            ->assertSee('民話一覧')
+            ->assertSee('タグ一括変更')
+            ->assertSee('選択した民話にタグを付与');
         $this->get(route('admin.stories.create'))->assertOk()->assertSee('本文（Markdown）');
         $this->get(route('admin.municipalities.index'))->assertOk()->assertSee('市町村一覧');
         $this->get(route('admin.municipalities.create'))->assertOk()->assertSee('地域名');
@@ -86,6 +90,28 @@ class AdminManagementTest extends TestCase
             strpos($response->getContent(), '一覧テスト14'),
             strpos($response->getContent(), '一覧テスト00'),
         );
+    }
+
+    public function test_multiple_stories_can_receive_tags_in_bulk(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $tag = Tag::create(['name' => '山の話']);
+        $otherTag = Tag::create(['name' => '伝説']);
+        $first = Story::create(['title' => '民話A', 'body_markdown' => '本文A']);
+        $second = Story::create(['title' => '民話B', 'body_markdown' => '本文B']);
+        $first->tags()->attach($otherTag);
+
+        $this->post(route('admin.stories.bulk-tags'), [
+            'story_ids' => [$first->id, $second->id],
+            'tag_ids' => [$tag->id],
+        ])->assertRedirect(route('admin.stories.index'))
+            ->assertSessionHas('status', '2件の民話にタグを付けました。');
+
+        $this->assertEqualsCanonicalizing(
+            [$otherTag->id, $tag->id],
+            $first->tags()->pluck('tags.id')->all(),
+        );
+        $this->assertSame([$tag->id], $second->tags()->pluck('tags.id')->all());
     }
 
     public function test_story_form_uploads_main_and_inline_images(): void

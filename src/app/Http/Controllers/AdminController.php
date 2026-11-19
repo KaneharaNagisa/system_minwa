@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -61,8 +62,35 @@ class AdminController extends Controller
         return view('admin.stories.index', [
             'stories' => $stories,
             'municipalities' => Municipality::query()->orderBy('name')->get(),
+            'tags' => Tag::query()->orderBy('name')->get(),
             'filters' => $request->only(['q', 'municipality_id', 'sort', 'direction']),
         ]);
+    }
+
+    public function bulkTagStories(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'story_ids' => ['required', 'array', 'min:1'],
+            'story_ids.*' => ['integer', 'distinct', 'exists:stories,id'],
+            'tag_ids' => ['required', 'array', 'min:1'],
+            'tag_ids.*' => ['integer', 'distinct', 'exists:tags,id'],
+        ], [
+            'story_ids.required' => 'タグを付ける民話を選択してください。',
+            'story_ids.min' => 'タグを付ける民話を選択してください。',
+            'tag_ids.required' => '付けるタグを選択してください。',
+            'tag_ids.min' => '付けるタグを選択してください。',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            foreach (Story::query()->whereKey($validated['story_ids'])->get() as $story) {
+                $story->tags()->syncWithoutDetaching($validated['tag_ids']);
+            }
+        });
+
+        $count = count(array_unique($validated['story_ids']));
+
+        return redirect()->route('admin.stories.index')
+            ->with('status', "{$count}件の民話にタグを付けました。");
     }
 
     public function createStory(): View

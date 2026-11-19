@@ -5,7 +5,10 @@
 @section('content')
     <div class="admin-page-heading">
         <h1 class="admin-page-title">民話一覧</h1>
-        <a class="admin-btn-primary admin-btn-inline" href="{{ route('admin.stories.create') }}">民話を登録</a>
+        <div class="admin-page-actions">
+            <button class="admin-btn-secondary admin-btn-inline" type="button" data-open-bulk-tags>タグ一括変更</button>
+            <a class="admin-btn-primary admin-btn-inline" href="{{ route('admin.stories.create') }}">民話を登録</a>
+        </div>
     </div>
 
     <section class="admin-card">
@@ -47,11 +50,15 @@
         <div class="admin-table-wrap">
             <table class="admin-table">
                 <thead>
-                    <tr><th>タイトル</th><th>市町村</th><th>テーマタグ</th><th>更新日</th><th>操作</th></tr>
+                    <tr>
+                        <th><input type="checkbox" aria-label="すべての民話を選択" data-select-all-stories></th>
+                        <th>タイトル</th><th>市町村</th><th>テーマタグ</th><th>更新日</th><th>操作</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @forelse ($stories as $story)
                         <tr>
+                            <td><input type="checkbox" name="story_ids[]" value="{{ $story->id }}" form="bulk-tags-form" aria-label="{{ $story->title }}を選択" data-story-checkbox></td>
                             <td>{{ $story->title }}</td>
                             <td>{{ $story->municipality?->name ?? '未設定' }}</td>
                             <td>{{ $story->tags->pluck('name')->join('、') ?: '—' }}</td>
@@ -66,7 +73,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="admin-empty">条件に一致する民話はありません。</td></tr>
+                        <tr><td colspan="6" class="admin-empty">条件に一致する民話はありません。</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -75,4 +82,25 @@
             <div class="admin-pagination">{{ $stories->links() }}</div>
         @endif
     </section>
+
+        <dialog class="admin-bulk-dialog" data-bulk-tags-dialog>
+            <form id="bulk-tags-form" method="POST" action="{{ route('admin.stories.bulk-tags') }}">
+                @csrf
+                <div class="admin-bulk-dialog-heading">
+                    <h2>選択した民話にタグを付与</h2>
+                    <button class="admin-dialog-close" type="button" data-close-bulk-tags aria-label="閉じる">×</button>
+                </div>
+                <p class="admin-bulk-selected-count" data-bulk-selected-count>選択した民話：0件</p>
+                <label class="admin-form-label" for="bulk-tag-select">付与するタグ</label>
+                <select id="bulk-tag-select" class="admin-form-control admin-bulk-tag-select" name="tag_ids[]" multiple size="6" aria-label="付与するタグ">
+                    @foreach ($tags as $tag)
+                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                    @endforeach
+                </select>
+                <div class="admin-bulk-dialog-actions">
+                    <button class="admin-btn-secondary" type="button" data-close-bulk-tags>キャンセル</button>
+                    <button class="admin-btn-primary" type="submit">選択した民話にタグを付ける</button>
+                </div>
+            </form>
+        </dialog>
 @endsection

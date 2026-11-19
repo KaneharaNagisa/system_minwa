@@ -1,4 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const selectAllStories = document.querySelector('[data-select-all-stories]');
+    if (selectAllStories) {
+        const storyCheckboxes = Array.from(document.querySelectorAll('[data-story-checkbox]'));
+        selectAllStories.addEventListener('change', () => {
+            storyCheckboxes.forEach((checkbox) => {
+                checkbox.checked = selectAllStories.checked;
+            });
+        });
+        storyCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                selectAllStories.checked = storyCheckboxes.length > 0
+                    && storyCheckboxes.every((item) => item.checked);
+            });
+        });
+    }
+
+    const bulkTagsDialog = document.querySelector('[data-bulk-tags-dialog]');
+    const openBulkTags = document.querySelector('[data-open-bulk-tags]');
+    if (bulkTagsDialog && openBulkTags) {
+        const storyCheckboxes = Array.from(document.querySelectorAll('[data-story-checkbox]'));
+        const selectedCount = bulkTagsDialog.querySelector('[data-bulk-selected-count]');
+
+        openBulkTags.addEventListener('click', () => {
+            const count = storyCheckboxes.filter((checkbox) => checkbox.checked).length;
+            if (count === 0) {
+                window.alert('タグを付ける民話を選択してください。');
+                return;
+            }
+            selectedCount.textContent = `選択した民話：${count}件`;
+            bulkTagsDialog.showModal();
+        });
+        bulkTagsDialog.querySelectorAll('[data-close-bulk-tags]').forEach((button) => {
+            button.addEventListener('click', () => bulkTagsDialog.close());
+        });
+        bulkTagsDialog.addEventListener('click', (event) => {
+            if (event.target === bulkTagsDialog) bulkTagsDialog.close();
+        });
+    }
+
     const ocrUploader = document.querySelector('[data-ocr-uploader]');
 
     if (ocrUploader) {

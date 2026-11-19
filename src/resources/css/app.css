@@ -264,6 +264,17 @@ body {
 .admin-nav-logout:hover { background: #2f5d50; color: #fff; }
 .admin-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
 .admin-page-heading .admin-page-title { margin: 0; }
+.admin-page-actions { display: flex; align-items: center; gap: .6rem; }
+.admin-bulk-dialog { width: min(520px, calc(100% - 2rem)); border: 0; border-radius: .5rem; padding: 0; box-shadow: 0 1rem 3rem rgb(33 37 41 / .25); }
+.admin-bulk-dialog::backdrop { background: rgb(33 37 41 / .55); }
+.admin-bulk-dialog form { padding: 1.25rem; }
+.admin-bulk-dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .5rem; }
+.admin-bulk-dialog-heading h2 { margin: 0; font-size: 1.1rem; }
+.admin-dialog-close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: #6c757d; font-size: 1.5rem; cursor: pointer; }
+.admin-dialog-close:hover { background: #f1f3f5; }
+.admin-bulk-selected-count { margin: 0 0 1rem; color: #6c757d; font-size: .875rem; }
+.admin-bulk-tag-select { height: 160px; resize: vertical; }
+.admin-bulk-dialog-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.25rem; }
 .admin-btn-primary, .admin-btn-secondary {
     display: inline-flex;
     min-height: 40px;
@@ -288,6 +299,9 @@ body {
 .admin-filter-field { flex: 1 1 150px; }
 .admin-filter .admin-form-control { height: 40px; }
 .admin-filter-actions { display: flex; align-items: center; gap: .5rem; }
+.admin-bulk-tags { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #dee2e6; padding: 1rem 1.25rem; }
+.admin-bulk-tag-fields { display: flex; align-items: center; gap: .75rem; }
+.admin-bulk-tag-fields select { min-width: 220px; height: 44px; }
 .admin-table th, .admin-table td { vertical-align: middle; }
 .admin-row-actions { display: flex; align-items: center; gap: .8rem; }
 .admin-row-actions a, .admin-link-danger { color: #2f5d50; font-size: .875rem; text-decoration: underline; }
@@ -327,9 +341,13 @@ body {
 
 @media (max-width: 767px) {
     .admin-page-heading { align-items: flex-start; }
+    .admin-page-actions { flex-wrap: wrap; justify-content: flex-end; }
     .admin-filter { align-items: stretch; }
     .admin-filter-field { flex-basis: 100%; }
     .admin-filter-actions { justify-content: flex-start; }
+    .admin-bulk-tags { align-items: stretch; flex-direction: column; }
+    .admin-bulk-tag-fields { align-items: stretch; flex-direction: column; }
+    .admin-bulk-tag-fields select { width: 100%; min-width: 0; }
     .admin-form-grid { grid-template-columns: 1fr; }
     .admin-form-wide { grid-column: auto; }
 }
