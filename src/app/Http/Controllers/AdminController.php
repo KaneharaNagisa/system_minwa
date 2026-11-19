@@ -61,7 +61,10 @@ class AdminController extends Controller
 
         return view('admin.stories.index', [
             'stories' => $stories,
-            'municipalities' => Municipality::query()->orderBy('name')->get(),
+            'municipalities' => Municipality::query()
+                ->orderByRaw('CASE WHEN name = ? THEN 0 ELSE 1 END', ['長野県全域'])
+                ->orderBy('name')
+                ->get(),
             'tags' => Tag::query()->orderBy('name')->get(),
             'filters' => $request->only(['q', 'municipality_id', 'sort', 'direction']),
         ]);

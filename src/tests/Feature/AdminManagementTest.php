@@ -114,6 +114,29 @@ class AdminManagementTest extends TestCase
         $this->get('/')->assertDontSee('山の民話');
     }
 
+    public function test_stories_can_be_filtered_by_prefecture_wide_municipality(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $prefectureWide = Municipality::create(['name' => '長野県全域', 'region_name' => '全域']);
+        $city = Municipality::create(['name' => '長野市', 'region_name' => '北信']);
+        Story::create([
+            'municipality_id' => $prefectureWide->id,
+            'title' => '県全域の民話',
+            'body_markdown' => '本文',
+        ]);
+        Story::create([
+            'municipality_id' => $city->id,
+            'title' => '長野市の民話',
+            'body_markdown' => '本文',
+        ]);
+
+        $this->get(route('admin.stories.index', ['municipality_id' => $prefectureWide->id]))
+            ->assertOk()
+            ->assertSee('長野県全域')
+            ->assertSee('県全域の民話')
+            ->assertDontSee('長野市の民話');
+    }
+
     public function test_related_site_url_is_public_and_admin_memo_is_private(): void
     {
         $this->actingAs(User::factory()->create());
