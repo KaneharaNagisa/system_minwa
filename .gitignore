@@ -1,0 +1,7 @@
+docker-compose.yml
+src/node_modules/
+src/storage/
+.env
+obsidian_system_minwa/.obsidian/workspace.json
+.DS_Store
+Thumbs.db
