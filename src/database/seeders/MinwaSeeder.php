@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Municipality;
 use App\Models\Story;
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +16,15 @@ class MinwaSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
+            $this->call(TagSeeder::class);
+
+            $tagNamesBySource = [
+                'まんが日本昔ばなし〜データベース〜（長野県）' => 'まんが日本昔ばなし',
+                '民話の部屋（長野県）' => '民話の部屋',
+            ];
+            $tagIdsByName = Tag::whereIn('name', array_values($tagNamesBySource))
+                ->pluck('id', 'name');
+
             $municipalities = [
                 '長野市' => '北信',
                 '千曲市' => '北信',
@@ -905,7 +915,7 @@ class MinwaSeeder extends Seeder
                 unset($story['municipality_name']);
                 $story['related_site_url'] = $sourceUrls[$story['title']] ?? $story['related_site_url'] ?? null;
 
-                Story::updateOrCreate(
+                $seededStory = Story::updateOrCreate(
                     [
                         'municipality_id' => $municipalityId,
                         'title' => $story['title'],
@@ -915,6 +925,18 @@ class MinwaSeeder extends Seeder
                         'expression_rewritten_checked' => false,
                     ]),
                 );
+
+                $sourceTagIds = [];
+                foreach (explode('、', (string) ($story['source'] ?? '')) as $source) {
+                    $tagName = $tagNamesBySource[$source] ?? null;
+                    if ($tagName !== null) {
+                        $sourceTagIds[] = $tagIdsByName[$tagName];
+                    }
+                }
+
+                if ($sourceTagIds !== []) {
+                    $seededStory->tags()->syncWithoutDetaching($sourceTagIds);
+                }
             }
         });
     }

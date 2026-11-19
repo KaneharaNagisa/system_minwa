@@ -6,6 +6,7 @@ use App\Models\Municipality;
 use App\Models\Story;
 use App\Models\Tag;
 use App\Models\User;
+use Database\Seeders\MinwaSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,31 @@ use Tests\TestCase;
 class AdminManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_theme_tags_are_included_in_the_database_and_minwa_seeders(): void
+    {
+        $this->seed();
+        $this->seed(MinwaSeeder::class);
+
+        $this->assertDatabaseHas('tags', ['name' => 'まんが日本昔ばなし']);
+        $this->assertDatabaseHas('tags', ['name' => '民話の部屋']);
+        $this->assertDatabaseCount('tags', 2);
+
+        $mangaStory = Story::where('source', 'まんが日本昔ばなし〜データベース〜（長野県）')->firstOrFail();
+        $this->assertSame(
+            ['まんが日本昔ばなし'],
+            $mangaStory->tags()->pluck('tags.name')->all(),
+        );
+
+        $minwaStory = Story::where('source', '民話の部屋（長野県）')->firstOrFail();
+        $this->assertSame(['民話の部屋'], $minwaStory->tags()->pluck('tags.name')->all());
+
+        $storyWithBothSources = Story::where('title', 'あさこ・ゆうこ')->firstOrFail();
+        $this->assertEqualsCanonicalizing(
+            ['まんが日本昔ばなし', '民話の部屋'],
+            $storyWithBothSources->tags()->pluck('tags.name')->all(),
+        );
+    }
 
     public function test_management_pages_require_authentication(): void
     {
