@@ -109,7 +109,7 @@ class AdminManagementTest extends TestCase
     public function test_stories_can_be_created_searched_and_soft_deleted(): void
     {
         $this->actingAs(User::factory()->create());
-        $municipality = Municipality::create(['name' => '長野市', 'region_name' => '北信']);
+        $municipality = Municipality::where('name', '長野市')->firstOrFail();
         $tag = Tag::create(['name' => '山の話']);
 
         $this->post(route('admin.stories.store'), [
@@ -139,8 +139,8 @@ class AdminManagementTest extends TestCase
     public function test_stories_can_be_filtered_by_prefecture_wide_municipality(): void
     {
         $this->actingAs(User::factory()->create());
-        $prefectureWide = Municipality::create(['name' => '長野県全域', 'region_name' => '全域']);
-        $city = Municipality::create(['name' => '長野市', 'region_name' => '北信']);
+        $prefectureWide = Municipality::where('name', '長野県全域')->firstOrFail();
+        $city = Municipality::where('name', '長野市')->firstOrFail();
         Story::create([
             'municipality_id' => $prefectureWide->id,
             'title' => '県全域の民話',
@@ -277,12 +277,12 @@ class AdminManagementTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        $this->post(route('admin.municipalities.store'), ['name' => '松本市', 'region_name' => '中信'])
+        $this->post(route('admin.municipalities.store'), ['name' => 'テスト市', 'region_name' => '中信'])
             ->assertRedirect(route('admin.municipalities.index'));
-        $municipality = Municipality::where('name', '松本市')->firstOrFail();
-        $this->put(route('admin.municipalities.update', $municipality), ['name' => '新松本市', 'region_name' => '中信'])
+        $municipality = Municipality::where('name', 'テスト市')->firstOrFail();
+        $this->put(route('admin.municipalities.update', $municipality), ['name' => '新テスト市', 'region_name' => '中信'])
             ->assertRedirect(route('admin.municipalities.index'));
-        $this->assertDatabaseHas('municipalities', ['id' => $municipality->id, 'name' => '新松本市']);
+        $this->assertDatabaseHas('municipalities', ['id' => $municipality->id, 'name' => '新テスト市']);
 
         $this->post(route('admin.tags.store'), ['name' => '伝説'])
             ->assertRedirect(route('admin.tags.index'));
