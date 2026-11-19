@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01_project_spec/project_spec_common.md",
+                "file": "00_copilot_rules.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "project_spec_common"
+              "title": "00_copilot_rules"
             }
           }
         ]
@@ -188,10 +188,11 @@
       "bases:新規ベースを作成": false
     }
   },
-  "active": "63a3f2d4c95b2149",
+  "active": "452e0580327e974b",
   "lastOpenFiles": [
-    "00_copilot_rules.md",
     "02_mistakes_log.md",
-    "03_prompts.md"
+    "03_prompts.md",
+    "01_project_spec/project_spec_common.md",
+    "00_copilot_rules.md"
   ]
 }
