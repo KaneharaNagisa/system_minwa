@@ -36,7 +36,7 @@
             </div>
             <div class="admin-form-group">
                 <label class="admin-form-label" for="municipality_id">市町村</label>
-                <select class="admin-form-control" id="municipality_id" name="municipality_id">
+                <select class="admin-form-control" id="municipality_id" name="municipality_id" data-searchable-select data-search-placeholder="市町村を検索">
                     <option value="">未設定</option>
                     @foreach ($municipalities as $municipality)
                         <option value="{{ $municipality->id }}" @selected(old('municipality_id', $story->municipality_id) == $municipality->id)>{{ $municipality->name }}（{{ $municipality->region_name }}）</option>

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Municipality;
 use App\Models\Story;
 use App\Models\Tag;
+use App\Support\NaganoMunicipalities;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -25,39 +26,20 @@ class MinwaSeeder extends Seeder
             $tagIdsByName = Tag::whereIn('name', array_values($tagNamesBySource))
                 ->pluck('id', 'name');
 
-            $municipalities = [
-                '長野市' => '北信',
-                '千曲市' => '北信',
-                '中野市' => '北信',
-                '須坂市' => '北信',
-                '栄村' => '北信',
-                '野沢温泉村' => '北信',
-                '山ノ内町' => '北信',
-                '佐久市' => '東信',
-                '軽井沢町' => '東信',
-                '松本市' => '中信',
-                '塩尻市' => '中信',
-                '安曇野市' => '中信',
-                '白馬村' => '中信',
-                '小谷村' => '中信',
-                '木祖村' => '中信',
-                '諏訪市' => '南信',
-                '伊那市' => '南信',
-                '駒ヶ根市' => '南信',
-                '富士見町' => '南信',
-                '飯田市' => '南信',
-                '阿南町' => '南信',
-                '長野県全域' => '全域',
-            ];
             $municipalityIds = [];
 
-            foreach ($municipalities as $name => $regionName) {
+            foreach (NaganoMunicipalities::all() as $municipalityData) {
                 $municipality = Municipality::updateOrCreate(
-                    ['name' => $name],
-                    ['region_name' => $regionName],
+                    ['name' => $municipalityData['name']],
+                    ['region_name' => $municipalityData['region_name']],
                 );
-                $municipalityIds[$name] = $municipality->id;
+                $municipalityIds[$municipalityData['name']] = $municipality->id;
             }
+            $prefectureWideMunicipality = Municipality::updateOrCreate(
+                ['name' => '長野県全域'],
+                ['region_name' => '全域'],
+            );
+            $municipalityIds[$prefectureWideMunicipality->name] = $prefectureWideMunicipality->id;
 
             $stories = [
                 // 1

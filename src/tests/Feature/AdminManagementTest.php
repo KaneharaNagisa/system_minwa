@@ -41,6 +41,28 @@ class AdminManagementTest extends TestCase
         );
     }
 
+    public function test_all_nagano_municipalities_are_available_in_story_selects(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $mapMunicipalities = json_decode(
+            file_get_contents(resource_path('data/nagano-municipalities.json')),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+
+        $this->assertCount(77, $mapMunicipalities);
+        $this->assertDatabaseCount('municipalities', 78);
+
+        $response = $this->get(route('admin.stories.create'))
+            ->assertOk()
+            ->assertSee('data-searchable-select', false)
+            ->assertSee('data-search-placeholder="市町村を検索"', false);
+
+        foreach ($mapMunicipalities as $municipality) {
+            $response->assertSee($municipality['name']);
+        }
+    }
+
     public function test_minwa_seeder_registers_manga_stories_with_bodies_and_source_links_without_duplicates(): void
     {
         $this->seed(MinwaSeeder::class);

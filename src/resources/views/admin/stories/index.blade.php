@@ -19,7 +19,7 @@
             </div>
             <div class="admin-filter-field">
                 <label class="admin-form-label" for="municipality-filter">市町村</label>
-                <select class="admin-form-control" id="municipality-filter" name="municipality_id">
+                <select class="admin-form-control" id="municipality-filter" name="municipality_id" data-searchable-select data-search-placeholder="市町村を検索">
                     <option value="">すべて</option>
                     @foreach ($municipalities as $municipality)
                         <option value="{{ $municipality->id }}" @selected(($filters['municipality_id'] ?? '') == $municipality->id)>{{ $municipality->name }}</option>
