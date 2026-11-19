@@ -60,7 +60,7 @@ services:
       UPLOAD_LIMIT: 256M
       TZ: Asia/Tokyo
     ports:
-      - "8081:80" # ブラウザから http://localhost:8081 でアクセス
+      - "8082:80" # ブラウザから http://localhost:8082 でアクセス
     networks:
       - app-network
 
