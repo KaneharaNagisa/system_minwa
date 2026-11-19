@@ -77,6 +77,7 @@ class StoryController extends Controller
 
         return view('welcome', [
             'stories' => $stories,
+            'registeredStoryCount' => Story::count(),
             'municipalities' => $municipalities,
             'mapAreas' => $mapAreas,
             'tags' => $tags,

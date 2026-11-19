@@ -52,6 +52,37 @@ class ExampleTest extends TestCase
             ->assertSee('岡谷市、登録民話0編、選択中');
     }
 
+    public function test_registered_story_count_does_not_change_with_search_filters(): void
+    {
+        $municipality = Municipality::create([
+            'name' => '長野市',
+            'region_name' => '北信',
+        ]);
+        Story::create([
+            'municipality_id' => $municipality->id,
+            'title' => '検索対象の民話',
+            'body_markdown' => '本文',
+        ]);
+        Story::create([
+            'municipality_id' => $municipality->id,
+            'title' => 'もう一つの民話',
+            'body_markdown' => '本文',
+        ]);
+        Story::create([
+            'municipality_id' => $municipality->id,
+            'title' => '削除済みの民話',
+            'body_markdown' => '本文',
+        ])->delete();
+
+        $this->get('/?q=検索対象')
+            ->assertOk()
+            ->assertViewHas('registeredStoryCount', 2);
+
+        $this->get('/?q=該当なし')
+            ->assertOk()
+            ->assertViewHas('registeredStoryCount', 2);
+    }
+
     public function test_admin_shows_login_for_guests(): void
     {
         $this->get('/admin')

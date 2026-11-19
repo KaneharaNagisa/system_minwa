@@ -31,7 +31,7 @@
             </div>
             <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-full border-2 border-gold/70 bg-white/70 text-center shadow-sm">
                 <span class="text-[10px] text-amber-800">登録民話</span>
-                <span class="text-2xl font-bold">{{ $stories->total() }}</span>
+                <span class="text-2xl font-bold">{{ $registeredStoryCount }}</span>
                 <span class="text-[10px] text-muted">編</span>
             </div>
         </div>
