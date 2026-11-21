@@ -99,7 +99,12 @@ class AdminManagementTest extends TestCase
             ->assertSee('民話一覧')
             ->assertSee('タグ一括変更')
             ->assertSee('選択した民話にタグを付与');
-        $this->get(route('admin.stories.create'))->assertOk()->assertSee('本文（Markdown）');
+        $this->get(route('admin.stories.create'))
+            ->assertOk()
+            ->assertSee('本文（Markdown）')
+            ->assertSee('data-story-upload-form', false)
+            ->assertSee('data-admin-loading', false)
+            ->assertSee('data-admin-loading-message', false);
         $this->get(route('admin.municipalities.index'))->assertOk()->assertSee('市町村一覧');
         $this->get(route('admin.municipalities.create'))->assertOk()->assertSee('地域名');
         $this->get(route('admin.tags.index'))->assertOk()->assertSee('テーマタグ一覧');

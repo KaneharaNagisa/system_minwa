@@ -1,4 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const loadingOverlay = document.querySelector('[data-admin-loading]');
+    const loadingMessage = loadingOverlay?.querySelector('[data-admin-loading-message]');
+    const loadingTargets = document.querySelectorAll('.admin-sidebar, .admin-sidebar-backdrop, .admin-main');
+    let previousFocus = null;
+
+    const setAdminLoading = (isLoading, message = '処理中です。しばらくお待ちください。') => {
+        if (!loadingOverlay || !loadingMessage) return;
+
+        if (isLoading) {
+            previousFocus = document.activeElement;
+            loadingMessage.textContent = message;
+            loadingOverlay.hidden = false;
+            loadingTargets.forEach((target) => target.inert = true);
+            document.body.classList.add('admin-is-loading');
+            loadingOverlay.focus();
+            return;
+        }
+
+        loadingOverlay.hidden = true;
+        loadingTargets.forEach((target) => target.inert = false);
+        document.body.classList.remove('admin-is-loading');
+        if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
+            previousFocus.focus();
+        }
+        previousFocus = null;
+    };
+
     document.querySelectorAll('[data-searchable-select]').forEach((select) => {
         const component = document.createElement('div');
         const trigger = document.createElement('button');
@@ -185,7 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData();
             files.forEach((file) => formData.append('images[]', file));
             selectButton.disabled = true;
+            fileInput.disabled = true;
             displayStatus('画像を読み取っています。しばらくお待ちください。');
+            setAdminLoading(true, '画像を読み取っています。しばらくお待ちください。');
 
             try {
                 const response = await fetch(ocrUploader.dataset.ocrUrl, {
@@ -208,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(result.message || `画像の読み取りに失敗しました（${response.status}）。`);
                 }
 
-                const recognizedText = result.text.trim();
+                const recognizedText = String(result.text ?? '').trim();
                 if (recognizedText === '') {
                     displayStatus('文字を読み取れませんでした。画像を確認して再度お試しください。', true);
                     return;
@@ -223,8 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 displayStatus(error.message || '通信に失敗しました。時間をおいて再度お試しください。', true);
             } finally {
                 selectButton.disabled = false;
+                fileInput.disabled = false;
                 fileInput.value = '';
                 fileList.textContent = '最大10枚、1枚10MBまで';
+                setAdminLoading(false);
             }
         };
 
@@ -242,6 +273,16 @@ document.addEventListener('DOMContentLoaded', () => {
             recognizeImages(Array.from(event.dataTransfer.files));
         });
     }
+
+    const storyUploadForm = document.querySelector('[data-story-upload-form]');
+    storyUploadForm?.addEventListener('submit', () => {
+        const hasImageUpload = Array.from(storyUploadForm.querySelectorAll('input[type="file"]'))
+            .some((input) => input.files?.length > 0);
+
+        if (hasImageUpload) {
+            setAdminLoading(true, '画像をアップロードしています。しばらくお待ちください。');
+        }
+    });
 
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const sidebarToggle = document.querySelector('[data-admin-sidebar-toggle]');

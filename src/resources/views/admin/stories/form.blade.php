@@ -8,7 +8,7 @@
         <a class="admin-btn-secondary" href="{{ route('admin.stories.index') }}">一覧へ戻る</a>
     </div>
 
-    <form class="admin-card admin-edit-form" method="POST" enctype="multipart/form-data" action="{{ $story->exists ? route('admin.stories.update', $story) : route('admin.stories.store') }}">
+    <form class="admin-card admin-edit-form" method="POST" enctype="multipart/form-data" action="{{ $story->exists ? route('admin.stories.update', $story) : route('admin.stories.store') }}" data-story-upload-form>
         @csrf
         @if ($story->exists)
             @method('PUT')

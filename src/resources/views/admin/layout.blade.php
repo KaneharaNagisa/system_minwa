@@ -53,5 +53,11 @@
         @yield('content')
     </div>
 </main>
+<div class="admin-loading-overlay" data-admin-loading hidden role="status" aria-live="assertive" tabindex="-1">
+    <div class="admin-loading-content">
+        <span class="admin-loading-spinner" aria-hidden="true"></span>
+        <p class="admin-loading-message" data-admin-loading-message>処理中です。しばらくお待ちください。</p>
+    </div>
+</div>
 </body>
 </html>
