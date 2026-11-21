@@ -14,17 +14,6 @@
             @method('PUT')
         @endif
 
-        <section class="admin-ocr-card" data-ocr-uploader data-ocr-url="{{ route('admin.stories.ocr') }}">
-            <h2 class="admin-ocr-title"><span aria-hidden="true">⇧</span> 1. 資料画像のアップロードと文字の自動読み込み（OCR）</h2>
-            <p class="admin-ocr-description">書籍やパンフレットを撮影した画像（複数選択可）をアップロードすると、文字を読み取り、本文欄に追加します。画像はこのサーバー内で処理し、第三者サービスへ送信しません。</p>
-            <div class="admin-ocr-dropzone" data-ocr-dropzone>
-                <input class="admin-ocr-file-input" id="ocr_images" type="file" accept="image/*" multiple data-ocr-files>
-                <button class="admin-btn-secondary admin-ocr-select" type="button" data-ocr-select>＋ 画像ファイルを選択（複数可）</button>
-                <p class="admin-ocr-file-list" data-ocr-file-list aria-live="polite">最大10枚、1枚10MBまで</p>
-            </div>
-            <p class="admin-ocr-status" data-ocr-status role="status" aria-live="polite"></p>
-        </section>
-
         <div class="admin-form-grid">
             <div class="admin-form-group">
                 <label class="admin-form-label" for="title">タイトル <span class="admin-required">必須</span></label>

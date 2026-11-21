@@ -15,7 +15,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/stories', [AdminController::class, 'stories'])->name('stories.index');
     Route::post('/stories/bulk-tags', [AdminController::class, 'bulkTagStories'])->name('stories.bulk-tags');
     Route::get('/stories/create', [AdminController::class, 'createStory'])->name('stories.create');
-    Route::post('/stories/ocr', [AdminController::class, 'ocrImages'])->name('stories.ocr');
     Route::post('/stories', [AdminController::class, 'storeStory'])->name('stories.store');
     Route::get('/stories/{story}/edit', [AdminController::class, 'editStory'])->name('stories.edit');
     Route::put('/stories/{story}', [AdminController::class, 'updateStory'])->name('stories.update');

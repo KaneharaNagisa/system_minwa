@@ -102,6 +102,8 @@ class AdminManagementTest extends TestCase
         $this->get(route('admin.stories.create'))
             ->assertOk()
             ->assertSee('本文（Markdown）')
+            ->assertDontSee('data-ocr-uploader', false)
+            ->assertDontSee('OCR')
             ->assertSee('data-story-upload-form', false)
             ->assertSee('data-admin-loading', false)
             ->assertSee('data-admin-loading-message', false);
@@ -255,27 +257,6 @@ class AdminManagementTest extends TestCase
         Storage::disk('public')->assertExists($story->main_image_path);
         $this->assertSame(1, preg_match('/!\[挿絵\]\(\/storage\/([^)]+)\)/', $story->body_markdown, $matches));
         Storage::disk('public')->assertExists($matches[1]);
-    }
-
-    public function test_ocr_endpoint_processes_multiple_images_and_returns_text(): void
-    {
-        $this->actingAs(User::factory()->create());
-
-        $this->postJson(route('admin.stories.ocr'), [
-            'images' => [
-                UploadedFile::fake()->image('page-one.png'),
-                UploadedFile::fake()->image('page-two.png'),
-            ],
-        ])->assertOk()->assertJsonStructure(['text']);
-
-        $tooManyImages = [];
-        for ($index = 0; $index < 11; $index++) {
-            $tooManyImages[] = UploadedFile::fake()->image("page-{$index}.png");
-        }
-
-        $this->postJson(route('admin.stories.ocr'), ['images' => $tooManyImages])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('images');
     }
 
     public function test_municipalities_and_tags_can_be_managed(): void
