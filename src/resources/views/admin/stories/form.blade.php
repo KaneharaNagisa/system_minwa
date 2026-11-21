@@ -62,7 +62,16 @@
                     <div class="admin-related-images">
                         @foreach ($story->relatedImages as $image)
                             <figure class="admin-related-image">
-                                <img src="{{ asset('storage/' . $image->path) }}" alt="{{ $image->original_name }}" loading="lazy">
+                                <button
+                                    class="admin-related-image-open"
+                                    type="button"
+                                    data-open-related-image
+                                    data-image-src="{{ asset('storage/' . $image->path) }}"
+                                    data-image-alt="{{ $image->original_name }}"
+                                    aria-label="{{ $image->original_name }}を拡大表示"
+                                >
+                                    <img src="{{ asset('storage/' . $image->path) }}" alt="{{ $image->original_name }}" loading="lazy">
+                                </button>
                                 <figcaption title="{{ $image->original_name }}">{{ $image->original_name }}</figcaption>
                                 <label class="admin-check admin-related-image-delete">
                                     <input
@@ -78,7 +87,7 @@
                     </div>
                 @endif
                 <input class="admin-form-control" id="related_images" name="related_images[]" type="file" accept="image/*" multiple>
-                <small class="admin-help">この民話に関連する画像を複数枚選択できます。各画像10MB以下です。関連画像は管理画面でのみ表示されます。</small>
+                <small class="admin-help">画像全体を確認できます。クリックすると拡大表示します。この民話に関連する画像を複数枚選択でき、各画像は10MB以下です。関連画像は管理画面でのみ表示されます。</small>
             </div>
             <div class="admin-form-group">
                 <label class="admin-form-label" for="spot_name">ゆかりの地 名称</label>
@@ -129,4 +138,10 @@
             <button class="admin-btn-primary admin-btn-inline" type="submit">{{ $story->exists ? '変更を保存' : '民話を登録' }}</button>
         </div>
     </form>
+
+    <dialog class="admin-image-dialog" data-related-image-dialog aria-label="関連画像の拡大表示">
+        <button class="admin-image-dialog-close" type="button" data-close-related-image aria-label="閉じる">×</button>
+        <img data-related-image-preview src="" alt="">
+        <p data-related-image-name></p>
+    </dialog>
 @endsection

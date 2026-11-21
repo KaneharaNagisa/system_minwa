@@ -196,6 +196,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const relatedImageDialog = document.querySelector('[data-related-image-dialog]');
+    if (relatedImageDialog) {
+        const preview = relatedImageDialog.querySelector('[data-related-image-preview]');
+        const imageName = relatedImageDialog.querySelector('[data-related-image-name]');
+
+        document.querySelectorAll('[data-open-related-image]').forEach((button) => {
+            button.addEventListener('click', () => {
+                preview.src = button.dataset.imageSrc;
+                preview.alt = button.dataset.imageAlt;
+                imageName.textContent = button.dataset.imageAlt;
+                relatedImageDialog.showModal();
+            });
+        });
+        relatedImageDialog.querySelector('[data-close-related-image]')
+            ?.addEventListener('click', () => relatedImageDialog.close());
+        relatedImageDialog.addEventListener('click', (event) => {
+            if (event.target === relatedImageDialog) relatedImageDialog.close();
+        });
+    }
+
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const sidebarToggle = document.querySelector('[data-admin-sidebar-toggle]');
     const sidebarBackdrop = document.querySelector('[data-admin-sidebar-backdrop]');
