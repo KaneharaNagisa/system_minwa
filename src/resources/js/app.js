@@ -200,19 +200,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (relatedImageDialog) {
         const preview = relatedImageDialog.querySelector('[data-related-image-preview]');
         const imageName = relatedImageDialog.querySelector('[data-related-image-name]');
+        const imageCount = relatedImageDialog.querySelector('[data-related-image-count]');
+        const previousButton = relatedImageDialog.querySelector('[data-prev-related-image]');
+        const nextButton = relatedImageDialog.querySelector('[data-next-related-image]');
+        const imageButtons = Array.from(document.querySelectorAll('[data-open-related-image]'));
+        let currentImageIndex = 0;
+        let returnFocus = null;
 
-        document.querySelectorAll('[data-open-related-image]').forEach((button) => {
+        const showImage = (index) => {
+            if (imageButtons.length === 0) return;
+
+            currentImageIndex = (index + imageButtons.length) % imageButtons.length;
+            const button = imageButtons[currentImageIndex];
+            preview.src = button.dataset.imageSrc;
+            preview.alt = button.dataset.imageAlt;
+            imageName.textContent = button.dataset.imageAlt;
+            imageCount.textContent = `${currentImageIndex + 1} / ${imageButtons.length}`;
+            previousButton.hidden = imageButtons.length < 2;
+            nextButton.hidden = imageButtons.length < 2;
+        };
+
+        imageButtons.forEach((button, index) => {
             button.addEventListener('click', () => {
-                preview.src = button.dataset.imageSrc;
-                preview.alt = button.dataset.imageAlt;
-                imageName.textContent = button.dataset.imageAlt;
+                returnFocus = button;
+                showImage(index);
                 relatedImageDialog.showModal();
             });
         });
-        relatedImageDialog.querySelector('[data-close-related-image]')
-            ?.addEventListener('click', () => relatedImageDialog.close());
+        previousButton?.addEventListener('click', () => showImage(currentImageIndex - 1));
+        nextButton?.addEventListener('click', () => showImage(currentImageIndex + 1));
+        relatedImageDialog.querySelector('[data-close-related-image]')?.addEventListener('click', () => relatedImageDialog.close());
         relatedImageDialog.addEventListener('click', (event) => {
             if (event.target === relatedImageDialog) relatedImageDialog.close();
+        });
+        relatedImageDialog.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                showImage(currentImageIndex - 1);
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                showImage(currentImageIndex + 1);
+            }
+        });
+        relatedImageDialog.addEventListener('close', () => {
+            if (returnFocus?.isConnected) returnFocus.focus();
+            returnFocus = null;
         });
     }
 

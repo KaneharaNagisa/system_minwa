@@ -87,7 +87,7 @@
                     </div>
                 @endif
                 <input class="admin-form-control" id="related_images" name="related_images[]" type="file" accept="image/*" multiple>
-                <small class="admin-help">画像全体を確認できます。クリックすると拡大表示します。この民話に関連する画像を複数枚選択でき、各画像は10MB以下です。関連画像は管理画面でのみ表示されます。</small>
+                <small class="admin-help">画像全体を確認できます。クリックして拡大表示し、複数画像がある場合は左右ボタンまたは矢印キーで切り替えられます。この民話に関連する画像を複数枚選択でき、各画像は10MB以下です。関連画像は管理画面でのみ表示されます。</small>
             </div>
             <div class="admin-form-group">
                 <label class="admin-form-label" for="spot_name">ゆかりの地 名称</label>
@@ -141,7 +141,12 @@
 
     <dialog class="admin-image-dialog" data-related-image-dialog aria-label="関連画像の拡大表示">
         <button class="admin-image-dialog-close" type="button" data-close-related-image aria-label="閉じる">×</button>
+        <button class="admin-image-dialog-nav admin-image-dialog-prev" type="button" data-prev-related-image aria-label="前の画像">‹</button>
         <img data-related-image-preview src="" alt="">
-        <p data-related-image-name></p>
+        <button class="admin-image-dialog-nav admin-image-dialog-next" type="button" data-next-related-image aria-label="次の画像">›</button>
+        <div class="admin-image-dialog-caption">
+            <p data-related-image-name></p>
+            <p class="admin-image-dialog-count" data-related-image-count aria-live="polite"></p>
+        </div>
     </dialog>
 @endsection

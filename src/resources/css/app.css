@@ -377,13 +377,21 @@ body {
 .admin-related-image img { display: block; width: 100%; height: 180px; border-radius: .25rem; object-fit: contain; }
 .admin-related-image figcaption { margin: .4rem 0; overflow: hidden; color: #495057; font-size: .8rem; text-overflow: ellipsis; white-space: nowrap; }
 .admin-related-image-delete { color: #b02a37; }
-.admin-image-dialog { width: min(1100px, calc(100vw - 2rem)); max-width: none; height: calc(100vh - 2rem); max-height: none; border: 0; border-radius: .5rem; background: rgb(20 20 20 / .96); padding: 2.75rem 1rem 1rem; color: #fff; overflow: hidden; }
+.admin-image-dialog { position: fixed; inset: 0; width: min(1100px, calc(100vw - 2rem)); max-width: none; height: calc(100vh - 2rem); max-height: none; margin: auto; border: 0; border-radius: .5rem; background: rgb(20 20 20 / .96); padding: 2.75rem 4rem 1rem; color: #fff; overflow: hidden; }
 .admin-image-dialog::backdrop { background: rgb(0 0 0 / .82); }
 .admin-image-dialog[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; }
 .admin-image-dialog img { display: block; max-width: 100%; max-height: calc(100% - 2.5rem); object-fit: contain; }
-.admin-image-dialog p { max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: .875rem; text-align: center; }
+.admin-image-dialog-caption { max-width: 100%; text-align: center; }
+.admin-image-dialog p { max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: .875rem; }
+.admin-image-dialog-count { margin-top: .25rem !important; color: #d6d9dc; font-size: .75rem !important; }
 .admin-image-dialog-close { position: absolute; top: .5rem; right: .5rem; display: grid; width: 40px; height: 40px; place-items: center; border: 0; border-radius: 50%; background: rgb(255 255 255 / .16); color: #fff; font-size: 1.75rem; line-height: 1; cursor: pointer; }
 .admin-image-dialog-close:hover { background: rgb(255 255 255 / .3); }
+.admin-image-dialog-nav { position: absolute; top: 50%; display: grid; width: 48px; height: 64px; place-items: center; transform: translateY(-50%); border: 0; border-radius: .4rem; background: rgb(255 255 255 / .16); color: #fff; font-size: 2.75rem; line-height: 1; cursor: pointer; }
+.admin-image-dialog-nav:hover { background: rgb(255 255 255 / .3); }
+.admin-image-dialog-nav[hidden] { display: none; }
+.admin-image-dialog-prev { left: .75rem; }
+.admin-image-dialog-next { right: .75rem; }
+.admin-image-dialog-close:focus-visible, .admin-image-dialog-nav:focus-visible { outline: 3px solid #86b7fe; outline-offset: 2px; }
 @keyframes admin-loading-spin {
     to { transform: rotate(360deg); }
 }
@@ -403,4 +411,8 @@ body {
     .admin-bulk-tag-fields select { width: 100%; min-width: 0; }
     .admin-form-grid { grid-template-columns: 1fr; }
     .admin-form-wide { grid-column: auto; }
+    .admin-image-dialog { padding-right: 3.5rem; padding-left: 3.5rem; }
+    .admin-image-dialog-nav { width: 40px; height: 56px; }
+    .admin-image-dialog-prev { left: .5rem; }
+    .admin-image-dialog-next { right: .5rem; }
 }

@@ -288,6 +288,9 @@ class AdminManagementTest extends TestCase
             ->assertSee('object.jpg')
             ->assertSee('data-open-related-image', false)
             ->assertSee('data-related-image-dialog', false)
+            ->assertSee('data-prev-related-image', false)
+            ->assertSee('data-next-related-image', false)
+            ->assertSee('data-related-image-count', false)
             ->assertSee('画像全体を確認できます');
         $this->get(route('stories.show', $story))
             ->assertOk()
