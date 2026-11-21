@@ -259,6 +259,55 @@ class AdminManagementTest extends TestCase
         Storage::disk('public')->assertExists($matches[1]);
     }
 
+    public function test_multiple_related_images_can_be_managed_in_the_admin_only(): void
+    {
+        $this->actingAs(User::factory()->create());
+        Storage::fake('public');
+
+        $this->post(route('admin.stories.store'), [
+            'title' => '資料写真つきの民話',
+            'body_markdown' => '本文',
+            'related_images' => [
+                UploadedFile::fake()->image('landscape.jpg'),
+                UploadedFile::fake()->image('object.jpg'),
+            ],
+        ])->assertRedirect(route('admin.stories.index'));
+
+        $story = Story::firstOrFail();
+        $images = $story->relatedImages;
+        $this->assertCount(2, $images);
+        $this->assertSame(['landscape.jpg', 'object.jpg'], $images->pluck('original_name')->all());
+        foreach ($images as $image) {
+            Storage::disk('public')->assertExists($image->path);
+        }
+
+        $this->get(route('admin.stories.edit', $story))
+            ->assertOk()
+            ->assertSee('関連画像')
+            ->assertSee('landscape.jpg')
+            ->assertSee('object.jpg');
+        $this->get(route('stories.show', $story))
+            ->assertOk()
+            ->assertDontSee('関連画像')
+            ->assertDontSee('landscape.jpg')
+            ->assertDontSee('object.jpg');
+
+        $deletedImage = $images->first();
+        $this->put(route('admin.stories.update', $story), [
+            'title' => $story->title,
+            'body_markdown' => $story->body_markdown,
+            'delete_related_image_ids' => [$deletedImage->id],
+            'related_images' => [UploadedFile::fake()->image('new-image.jpg')],
+        ])->assertRedirect(route('admin.stories.index'));
+
+        $this->assertDatabaseMissing('story_images', ['id' => $deletedImage->id]);
+        Storage::disk('public')->assertMissing($deletedImage->path);
+        $this->assertSame(
+            ['object.jpg', 'new-image.jpg'],
+            $story->fresh()->relatedImages->pluck('original_name')->all(),
+        );
+    }
+
     public function test_municipalities_and_tags_can_be_managed(): void
     {
         $this->actingAs(User::factory()->create());

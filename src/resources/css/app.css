@@ -370,6 +370,11 @@ body {
 .admin-check { display: inline-flex; align-items: center; gap: .4rem; color: #495057; font-size: .875rem; }
 .admin-form-footer { display: flex; justify-content: flex-end; gap: .6rem; border-top: 1px solid #edf0f2; padding-top: 1rem; }
 .admin-current-image { margin: 0 0 .5rem; color: #6c757d; font-size: .8rem; overflow-wrap: anywhere; }
+.admin-related-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .75rem; margin: 0 0 .75rem; }
+.admin-related-image { min-width: 0; margin: 0; border: 1px solid #dee2e6; border-radius: .375rem; background: #f8f9fa; padding: .5rem; }
+.admin-related-image img { display: block; width: 100%; height: 140px; border-radius: .25rem; background: #e9ecef; object-fit: cover; }
+.admin-related-image figcaption { margin: .4rem 0; overflow: hidden; color: #495057; font-size: .8rem; text-overflow: ellipsis; white-space: nowrap; }
+.admin-related-image-delete { color: #b02a37; }
 @keyframes admin-loading-spin {
     to { transform: rotate(360deg); }
 }

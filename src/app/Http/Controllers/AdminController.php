@@ -11,6 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -102,7 +103,7 @@ class AdminController extends Controller
     {
         $data = $this->validateStory($request);
         $tagIds = $data['tag_ids'] ?? [];
-        unset($data['body_images'], $data['main_image'], $data['tag_ids']);
+        unset($data['body_images'], $data['main_image'], $data['related_images'], $data['tag_ids']);
         $data['source_citation_checked'] = $request->boolean('source_citation_checked');
         $data['expression_rewritten_checked'] = $request->boolean('expression_rewritten_checked');
 
@@ -113,13 +114,14 @@ class AdminController extends Controller
 
         $story = Story::create($data);
         $story->tags()->sync($tagIds);
+        $this->storeRelatedImages($story, $request);
 
         return redirect()->route('admin.stories.index')->with('status', '民話を登録しました。');
     }
 
     public function editStory(Story $story): View
     {
-        $story->load('tags');
+        $story->load(['tags', 'relatedImages']);
 
         return view('admin.stories.form', $this->storyFormData($story));
     }
@@ -128,7 +130,14 @@ class AdminController extends Controller
     {
         $data = $this->validateStory($request);
         $tagIds = $data['tag_ids'] ?? [];
-        unset($data['body_images'], $data['main_image'], $data['tag_ids']);
+        $deleteRelatedImageIds = $data['delete_related_image_ids'] ?? [];
+        unset(
+            $data['body_images'],
+            $data['delete_related_image_ids'],
+            $data['main_image'],
+            $data['related_images'],
+            $data['tag_ids'],
+        );
         $data['source_citation_checked'] = $request->boolean('source_citation_checked');
         $data['expression_rewritten_checked'] = $request->boolean('expression_rewritten_checked');
 
@@ -139,6 +148,8 @@ class AdminController extends Controller
 
         $story->update($data);
         $story->tags()->sync($tagIds);
+        $this->removeRelatedImages($story, $deleteRelatedImageIds);
+        $this->storeRelatedImages($story, $request);
 
         return redirect()->route('admin.stories.index')->with('status', '民話を更新しました。');
     }
@@ -255,6 +266,10 @@ class AdminController extends Controller
             'main_image' => ['nullable', 'image', 'max:10240'],
             'body_images' => ['nullable', 'array'],
             'body_images.*' => ['image', 'max:10240'],
+            'related_images' => ['nullable', 'array'],
+            'related_images.*' => ['image', 'max:10240'],
+            'delete_related_image_ids' => ['nullable', 'array'],
+            'delete_related_image_ids.*' => ['integer', 'distinct', 'exists:story_images,id'],
             'spot_name' => ['nullable', 'string', 'max:255'],
             'spot_address' => ['nullable', 'string'],
             'spot_map_url' => ['nullable', 'url', 'max:2048'],
@@ -300,6 +315,32 @@ class AdminController extends Controller
         }
 
         return $path;
+    }
+
+    private function storeRelatedImages(Story $story, Request $request): void
+    {
+        $displayOrder = (int) $story->relatedImages()->max('display_order');
+
+        foreach ($request->file('related_images', []) as $image) {
+            $story->relatedImages()->create([
+                'path' => $this->storeStoryImage($image),
+                'original_name' => Str::limit($image->getClientOriginalName(), 255, ''),
+                'display_order' => ++$displayOrder,
+            ]);
+        }
+    }
+
+    private function removeRelatedImages(Story $story, array $imageIds): void
+    {
+        $images = $story->relatedImages()->whereKey($imageIds)->get();
+
+        foreach ($images as $image) {
+            if (! Storage::disk('public')->delete($image->path)) {
+                throw new RuntimeException('関連画像を削除できませんでした。');
+            }
+
+            $image->delete();
+        }
     }
 
     public function login(Request $request): RedirectResponse

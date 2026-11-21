@@ -56,6 +56,30 @@
                 <input class="admin-form-control" id="body_images" name="body_images[]" type="file" accept="image/*" multiple>
                 <small class="admin-help">選択した画像は本文末尾にMarkdown記法で追加されます。位置は本文欄で調整してください。各画像10MB以下。</small>
             </div>
+            <div class="admin-form-group admin-form-wide">
+                <label class="admin-form-label" for="related_images">関連画像</label>
+                @if ($story->exists && $story->relatedImages->isNotEmpty())
+                    <div class="admin-related-images">
+                        @foreach ($story->relatedImages as $image)
+                            <figure class="admin-related-image">
+                                <img src="{{ asset('storage/' . $image->path) }}" alt="{{ $image->original_name }}" loading="lazy">
+                                <figcaption title="{{ $image->original_name }}">{{ $image->original_name }}</figcaption>
+                                <label class="admin-check admin-related-image-delete">
+                                    <input
+                                        type="checkbox"
+                                        name="delete_related_image_ids[]"
+                                        value="{{ $image->id }}"
+                                        @checked(in_array($image->id, old('delete_related_image_ids', [])))
+                                    >
+                                    削除する
+                                </label>
+                            </figure>
+                        @endforeach
+                    </div>
+                @endif
+                <input class="admin-form-control" id="related_images" name="related_images[]" type="file" accept="image/*" multiple>
+                <small class="admin-help">この民話に関連する画像を複数枚選択できます。各画像10MB以下です。関連画像は管理画面でのみ表示されます。</small>
+            </div>
             <div class="admin-form-group">
                 <label class="admin-form-label" for="spot_name">ゆかりの地 名称</label>
                 <input class="admin-form-control" id="spot_name" name="spot_name" value="{{ old('spot_name', $story->spot_name) }}" maxlength="255">
