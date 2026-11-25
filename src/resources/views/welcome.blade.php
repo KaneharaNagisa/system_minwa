@@ -101,7 +101,7 @@
 
                     <div>
                         <h3 class="mb-2 text-sm font-bold">市町村別 登録民話件数 <span class="font-normal text-muted">（全{{ count($mapAreas) }}市町村）</span></h3>
-                        <div class="max-h-[34rem] overflow-y-auto rounded-sm border border-gold/15 bg-white/70 p-2">
+                        <div class="max-h-[34rem] overflow-y-auto rounded-sm border border-gold/15 bg-white/70 p-2" data-municipality-list>
                             <ul class="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-2">
                                 @foreach ($mapAreas as $area)
                                     @php
@@ -112,7 +112,7 @@
                                             'q' => $keyword,
                                         ]);
                                     @endphp
-                                    <li>
+                                    <li @if ($active) data-selected-municipality @endif>
                                         <a href="{{ route('stories.index', $parameters) }}"
                                            @if ($active) aria-current="page" @endif
                                            class="flex items-center justify-between gap-1 rounded-sm border px-2 py-1.5 text-xs transition {{ $active ? 'border-vermilion bg-vermilion text-white' : 'border-transparent hover:border-gold/25 hover:bg-washi' }}">

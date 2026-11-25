@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const municipalityList = document.querySelector('[data-municipality-list]');
+    const selectedMunicipality = municipalityList?.querySelector('[data-selected-municipality]');
+
+    if (municipalityList && selectedMunicipality) {
+        const selectedTop = municipalityList.scrollTop
+            + selectedMunicipality.getBoundingClientRect().top
+            - municipalityList.getBoundingClientRect().top;
+        const centeredTop = selectedTop - (municipalityList.clientHeight - selectedMunicipality.offsetHeight) / 2;
+        const maxScrollTop = municipalityList.scrollHeight - municipalityList.clientHeight;
+
+        municipalityList.scrollTo({
+            top: Math.max(0, Math.min(centeredTop, maxScrollTop)),
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+    }
+
     const loadingOverlay = document.querySelector('[data-admin-loading]');
     const loadingMessage = loadingOverlay?.querySelector('[data-admin-loading-message]');
     const loadingTargets = document.querySelectorAll('.admin-sidebar, .admin-sidebar-backdrop, .admin-main');
